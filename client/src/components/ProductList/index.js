@@ -1,44 +1,47 @@
 import React, { useEffect } from "react";
 import ProductItem from "../ProductItem";
-import { useStoreContext } from "../../utils/GlobalState";
+//import { useStoreContext } from "../../utils/GlobalState";
+import { store } from "../../utils/redux";
 import { UPDATE_PRODUCTS } from "../../utils/actions";
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery } from "@apollo/react-hooks";
 import { QUERY_PRODUCTS } from "../../utils/queries";
 import { idbPromise } from "../../utils/helpers";
-import spinner from "../../assets/spinner.gif"
+import spinner from "../../assets/spinner.gif";
 
 function ProductList() {
-  const [state, dispatch] = useStoreContext();
+  const state = store.getState();
 
   const { currentCategory } = state;
 
   const { loading, data } = useQuery(QUERY_PRODUCTS);
 
   useEffect(() => {
-    if(data) {
-      dispatch({
-           type: UPDATE_PRODUCTS,
-          products: data.products
-        });
-        data.products.forEach((product) => {
-          idbPromise('products', 'put', product);
-        });
+    if (data) {
+      store.dispatch({
+        type: UPDATE_PRODUCTS,
+        products: data.products,
+      });
+      data.products.forEach((product) => {
+        idbPromise("products", "put", product);
+      });
     } else if (!loading) {
-      idbPromise('products', 'get').then((products) => {
-        dispatch({
+      idbPromise("products", "get").then((products) => {
+        store.dispatch({
           type: UPDATE_PRODUCTS,
-         products: products
-       });
+          products: products,
+        });
       });
     }
-  }, [data, loading, dispatch]);
+  }, [data, loading]);
 
   function filterProducts() {
     if (!currentCategory) {
       return state.products;
     }
 
-    return state.products.filter(product => product.category._id === currentCategory);
+    return state.products.filter(
+      (product) => product.category._id === currentCategory
+    );
   }
 
   return (
@@ -46,22 +49,21 @@ function ProductList() {
       <h2>Our Products:</h2>
       {state.products.length ? (
         <div className="flex-row">
-            {filterProducts().map(product => (
-                <ProductItem
-                  key= {product._id}
-                  _id={product._id}
-                  image={product.image}
-                  name={product.name}
-                  price={product.price}
-                  quantity={product.quantity}
-                />
-            ))}
+          {filterProducts().map((product) => (
+            <ProductItem
+              key={product._id}
+              _id={product._id}
+              image={product.image}
+              name={product.name}
+              price={product.price}
+              quantity={product.quantity}
+            />
+          ))}
         </div>
       ) : (
         <h3>You haven't added any products yet!</h3>
       )}
-      { loading ? 
-      <img src={spinner} alt="loading" />: null}
+      {loading ? <img src={spinner} alt="loading" /> : null}
     </div>
   );
 }

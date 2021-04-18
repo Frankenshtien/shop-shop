@@ -1,12 +1,16 @@
-import React, { useEffect } from 'react';
-import { useQuery } from '@apollo/react-hooks';
-import { useStoreContext } from '../../utils/GlobalState';
-import { UPDATE_CATEGORIES, UPDATE_CURRENT_CATEGORY } from '../../utils/actions';
-import { QUERY_CATEGORIES } from '../../utils/queries';
-import { idbPromise } from '../../utils/helpers';
+import React, { useEffect } from "react";
+import { useQuery } from "@apollo/react-hooks";
+//import { useStoreContext } from '../../utils/GlobalState';
+import { store } from "../../utils/redux";
+import {
+  UPDATE_CATEGORIES,
+  UPDATE_CURRENT_CATEGORY,
+} from "../../utils/actions";
+import { QUERY_CATEGORIES } from "../../utils/queries";
+import { idbPromise } from "../../utils/helpers";
 
 function CategoryMenu() {
-  const [state, dispatch] = useStoreContext();
+  const state = store.getState();
 
   const { categories } = state;
 
@@ -14,34 +18,34 @@ function CategoryMenu() {
 
   useEffect(() => {
     if (categoryData) {
-      dispatch({
+      store.dispatch({
         type: UPDATE_CATEGORIES,
-        categories: categoryData.categories
+        categories: categoryData.categories,
       });
-      categoryData.categories.forEach(category => {
-        idbPromise('categories', 'put', category);
+      categoryData.categories.forEach((category) => {
+        idbPromise("categories", "put", category);
       });
     } else if (!loading) {
-      idbPromise('categories', 'get').then(categories => {
-        dispatch({
+      idbPromise("categories", "get").then((categories) => {
+        store.dispatch({
           type: UPDATE_CATEGORIES,
-          categories: categories
+          categories: categories,
         });
       });
     }
-  }, [categoryData, loading, dispatch]);
+  }, [categoryData, loading]);
 
-  const handleClick = id => {
-    dispatch({
+  const handleClick = (id) => {
+    store.dispatch({
       type: UPDATE_CURRENT_CATEGORY,
-      currentCategory: id
+      currentCategory: id,
     });
   };
 
   return (
     <div>
       <h2>Choose a Category:</h2>
-      {categories.map(item => (
+      {categories.map((item) => (
         <button
           key={item._id}
           onClick={() => {
