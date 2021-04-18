@@ -9,13 +9,16 @@ import Auth from "../../utils/auth";
 import { store } from "../../utils/redux";
 import { TOGGLE_CART, ADD_MULTIPLE_TO_CART } from "../../utils/actions";
 import "./style.css";
-
-console.log(store.getState());
+import { useDispatch, useSelector } from "react-redux";
 
 const stripePromise = loadStripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
 
 const Cart = () => {
-  const state = store.getState();
+  const state = useSelector((state) => {
+    return state;
+  });
+  const dispatch = useDispatch();
+  //const state = store.getState();
   const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
 
   useEffect(() => {
@@ -29,7 +32,7 @@ const Cart = () => {
   useEffect(() => {
     async function getCart() {
       const cart = await idbPromise("cart", "get");
-      store.dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
+      dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
     }
 
     if (!state.cart.length) {
@@ -38,7 +41,7 @@ const Cart = () => {
   }, [state.cart.length]);
 
   function toggleCart() {
-    store.dispatch({ type: TOGGLE_CART });
+    dispatch({ type: TOGGLE_CART });
   }
 
   function calculateTotal() {

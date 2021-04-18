@@ -5,18 +5,23 @@ import { pluralize } from "../../utils/helpers";
 import { store } from "../../utils/redux";
 import { ADD_TO_CART, UPDATE_CART_QUANTITY } from "../../utils/actions";
 import { idbPromise } from "../../utils/helpers";
+import { useDispatch, useSelector } from "react-redux";
 
 function ProductItem(item) {
-  const state = store.getState();
+  //const state = store.getState();
+  const state = useSelector((state) => {
+    return state;
+  });
+  const dispatch = useDispatch();
 
   const { image, name, _id, price, quantity } = item;
 
-  const { cart } = state;
+  //const { cart } = state;
 
   const addToCart = () => {
-    const itemInCart = cart.find((cartItem) => cartItem._id === _id);
+    const itemInCart = state.cart.find((cartItem) => cartItem._id === _id);
     if (itemInCart) {
-      store.dispatch({
+      dispatch({
         type: UPDATE_CART_QUANTITY,
         _id: _id,
         purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1,
@@ -26,7 +31,7 @@ function ProductItem(item) {
         purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1,
       });
     } else {
-      store.dispatch({
+      dispatch({
         type: ADD_TO_CART,
         product: { ...item, purchaseQuantity: 1 },
       });
